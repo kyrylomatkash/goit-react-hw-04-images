@@ -16,5 +16,5 @@ const Loader = () => {
     </Paper>
   );
 };
-
+// Експорт
 export default Loader;

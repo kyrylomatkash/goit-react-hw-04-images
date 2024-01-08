@@ -1,5 +1,5 @@
 // Імпорт бібліотек
-import React, { Component } from 'react';
+import React, { useState } from 'react';
 import {
   Grid,
   Card,
@@ -10,102 +10,83 @@ import {
   Box,
 } from '@mui/material';
 import { FacebookShareButton, PinterestShareButton } from 'react-share';
-// Основний клас компоненту
-class ImageGalleryItem extends Component {
-  state = {
-    isDetailsModalOpen: false,
-  };
+// Основна функція компоненту
+const ImageGalleryItem = ({ image, onImageClick }) => {
+  const [isDetailsModalOpen, setDetailsModalOpen] = useState(false);
   // Завантаження фото
-  handleDownload = () => {
-    const { image } = this.props;
+  const handleDownload = () => {
     const downloadLink = document.createElement('a');
     downloadLink.href = image.largeImageURL;
     downloadLink.download = `pixabay_image_${image.id}`;
     downloadLink.click();
   };
   // Відкриття модалки з деталями
-  handleDetailsModalOpen = () => {
-    this.setState({ isDetailsModalOpen: true });
+  const handleDetailsModalOpen = () => {
+    setDetailsModalOpen(true);
   };
   // Закриття модалки з деталями
-  handleDetailsModalClose = () => {
-    this.setState({ isDetailsModalOpen: false });
+  const handleDetailsModalClose = () => {
+    setDetailsModalOpen(false);
   };
-  // Рендер
-  render() {
-    const { image, onImageClick } = this.props;
-    const { isDetailsModalOpen } = this.state;
 
-    const shareUrl = image.largeImageURL;
-    const title = 'There is nice image';
+  const shareUrl = image.largeImageURL;
+  const title = 'There is a nice image';
 
-    return (
-      <Grid item xs={12} sm={6} md={4} lg={3}>
-        <Card>
-          <CardMedia
-            component="img"
-            height="140"
-            image={image.webformatURL}
-            alt=""
-            style={{ cursor: 'pointer' }}
-            onClick={() => onImageClick(image.largeImageURL)}
-          />
-          <Box p={2}>
-            <Button
-              variant="outlined"
-              fullWidth
-              onClick={this.handleDetailsModalOpen}
+  return (
+    <Grid item xs={12} sm={6} md={4} lg={3}>
+      <Card>
+        <CardMedia
+          component="img"
+          height="140"
+          image={image.webformatURL}
+          alt=""
+          style={{ cursor: 'pointer' }}
+          onClick={() => onImageClick(image.largeImageURL)}
+        />
+        <Box p={2}>
+          <Button variant="outlined" fullWidth onClick={handleDetailsModalOpen}>
+            View Details
+          </Button>
+          <Modal open={isDetailsModalOpen} onClose={handleDetailsModalClose}>
+            <Box
+              sx={{
+                position: 'absolute',
+                width: 400,
+                bgcolor: 'background.paper',
+                boxShadow: 24,
+                p: 4,
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+              }}
             >
-              View Details
-            </Button>
-            <Modal
-              open={isDetailsModalOpen}
-              onClose={this.handleDetailsModalClose}
-            >
-              <Box
-                sx={{
-                  position: 'absolute',
-                  width: 400,
-                  bgcolor: 'background.paper',
-                  boxShadow: 24,
-                  p: 4,
-                  top: '50%',
-                  left: '50%',
-                  transform: 'translate(-50%, -50%)',
-                }}
-              >
-                <Typography variant="h5">Details</Typography>
-                <Typography>Tags: {image.tags}</Typography>
-                <Typography>Likes: {image.likes}</Typography>
-                <Typography>Comments: {image.comments}</Typography>
-                <Button
-                  variant="outlined"
-                  fullWidth
-                  onClick={this.handleDownload}
+              <Typography variant="h5">Details</Typography>
+              <Typography>Tags: {image.tags}</Typography>
+              <Typography>Likes: {image.likes}</Typography>
+              <Typography>Comments: {image.comments}</Typography>
+              <Button variant="outlined" fullWidth onClick={handleDownload}>
+                Download
+              </Button>
+              <Button variant="outlined" fullWidth>
+                <FacebookShareButton url={shareUrl} quote={title}>
+                  Facebook
+                </FacebookShareButton>
+              </Button>
+              <Button variant="outlined" fullWidth>
+                <PinterestShareButton
+                  url={shareUrl}
+                  media={image.webformatURL}
+                  description={title}
                 >
-                  Download
-                </Button>
-                <Button variant="outlined" fullWidth>
-                  <FacebookShareButton url={shareUrl} quote={title}>
-                    Facebook
-                  </FacebookShareButton>
-                </Button>
-                <Button variant="outlined" fullWidth>
-                  <PinterestShareButton
-                    url={shareUrl}
-                    media={image.webformatURL}
-                    description={title}
-                  >
-                    Pinterest
-                  </PinterestShareButton>
-                </Button>
-              </Box>
-            </Modal>
-          </Box>
-        </Card>
-      </Grid>
-    );
-  }
-}
+                  Pinterest
+                </PinterestShareButton>
+              </Button>
+            </Box>
+          </Modal>
+        </Box>
+      </Card>
+    </Grid>
+  );
+};
 // Експорт
 export default ImageGalleryItem;

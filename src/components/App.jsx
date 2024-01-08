@@ -1,5 +1,5 @@
 // Імпорт бібліотек і компонентів
-import React, { Component } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Container, Paper } from '@mui/material';
@@ -10,106 +10,91 @@ import Loader from './loader-component/Loader';
 import Modal from './modal-component/Modal';
 // Імпорт логіки API запиту
 import { fetchImages } from '../api/api';
-// Основний клас застосунку
-class App extends Component {
-  state = {
-    images: [],
-    query: '',
-    page: 1,
-    isLoading: false,
-    showModal: false,
-    selectedImage: '',
-    loadMore: true,
-  };
-  componentDidUpdate(prevProps, prevState) {
-    if (
-      this.state.page !== prevState.page ||
-      this.state.query !== prevState.query
-    ) {
-      this.fetchImages();
-    }
-  }
+// Основна функція застосунку
+const App = () => {
+  const [images, setImages] = useState([]);
+  const [query, setQuery] = useState('');
+  const [page, setPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [selectedImage, setSelectedImage] = useState('');
+  const [loadMore, setLoadMore] = useState(true);
+
   // Пошук
-  handleSearchSubmit = query => {
+  const handleSearchSubmit = query => {
     if (!query.trim()) {
       toast.error('Please enter a search request.');
       return;
     }
 
-    this.setState({ query, page: 1, images: [] });
+    setQuery(query);
+    setPage(1);
+    setImages([]);
   };
+
   // Вивантаження зображень з API
-  fetchImages = () => {
-    const { query, page } = this.state;
-    this.setState({ isLoading: true });
+  useEffect(() => {
+    if (query.trim() !== '') {
+      setIsLoading(true);
 
-    fetchImages(query, page)
-      .then(response => {
-        const newImages = response.hits;
+      fetchImages(query, page)
+        .then(response => {
+          const newImages = response.hits;
 
-        if (newImages.length === 0) {
-          toast.info('No more images found.');
-        }
+          if (newImages.length === 0) {
+            toast.info('No more images found.');
+          }
 
-        this.setState(prevState => ({
-          images: [...prevState.images, ...newImages],
-          loadMore: prevState.page < Math.ceil(response.totalHits / 12),
-        }));
-      })
-      .catch(error => {
-        console.error('Error fetching images:', error);
-        toast.error('Error fetching images. Please try again.');
-      })
-      .finally(() => {
-        this.setState({ isLoading: false });
-      });
+          setImages(prevImages => [...prevImages, ...newImages]);
+          setLoadMore(page < Math.ceil(response.totalHits / 12));
+        })
+        .catch(error => {
+          console.error('Error fetching images:', error);
+          toast.error('Error fetching images. Please try again.');
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
+    }
+  }, [query, page]);
+
+  const handleLoadMore = () => {
+    setPage(prevPage => prevPage + 1);
   };
 
-  handleLoadMore = () => {
-    this.setState(prevState => ({ page: prevState.page + 1 }));
+  const handleImageClick = imageUrl => {
+    setShowModal(true);
+    setSelectedImage(imageUrl);
   };
 
-  handleImageClick = imageUrl => {
-    this.setState({ showModal: true, selectedImage: imageUrl });
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setSelectedImage('');
   };
 
-  handleCloseModal = () => {
-    this.setState({ showModal: false, selectedImage: '' });
-  };
-
-  // Рендер
-  render() {
-    const { images, isLoading, showModal, selectedImage, loadMore } =
-      this.state;
-
-    return (
-      <Container>
-        <Searchbar onSubmit={this.handleSearchSubmit} />
-        <Paper>
-          {images.length > 0 && (
-            <ImageGallery
-              images={images}
-              onImageClick={this.handleImageClick}
-            />
-          )}
-          {isLoading && <Loader />}
-          {loadMore && images.length > 0 && (
-            <LoadMoreButton onClick={this.handleLoadMore}>
-              Load More
-            </LoadMoreButton>
-          )}
-        </Paper>
-        {showModal && (
-          <Modal imageUrl={selectedImage} onClose={this.handleCloseModal} />
+  return (
+    <Container>
+      <Searchbar onSubmit={handleSearchSubmit} />
+      <Paper>
+        {images.length > 0 && (
+          <ImageGallery images={images} onImageClick={handleImageClick} />
         )}
-        <ToastContainer
-          position="bottom-right"
-          autoClose={3000}
-          hideProgressBar
-        />
-      </Container>
-    );
-  }
-}
+        {isLoading && <Loader />}
+        {loadMore && images.length > 0 && (
+          <LoadMoreButton onClick={handleLoadMore}>Load More</LoadMoreButton>
+        )}
+      </Paper>
+      {showModal && (
+        <Modal imageUrl={selectedImage} onClose={handleCloseModal} />
+      )}
+      <ToastContainer
+        position="bottom-right"
+        autoClose={3000}
+        hideProgressBar
+      />
+    </Container>
+  );
+};
+
 // Експорт
 export default App;
