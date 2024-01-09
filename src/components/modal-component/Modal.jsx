@@ -8,7 +8,7 @@ import {
   IconButton,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-
+// Основна функція компоненту
 const Modal = ({ imageUrl, onClose }) => {
   const handleCloseModal = () => {
     onClose();

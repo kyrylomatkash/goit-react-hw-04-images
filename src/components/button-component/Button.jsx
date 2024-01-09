@@ -1,7 +1,7 @@
 // Імпорт бібліотек
 import React from 'react';
 import { Button } from '@mui/material';
-
+// Основна функція компоненту
 const LoadMoreButton = ({ onClick, disabled }) => {
   return (
     <Button

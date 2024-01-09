@@ -2,7 +2,7 @@
 import React from 'react';
 import ImageGalleryItem from '../image-gallery-item-component/ImageGalleryItem';
 import { Grid } from '@mui/material';
-
+// Основна функція компоненту
 const ImageGallery = ({ images, onImageClick }) => {
   if (images.length === 0) {
     return <p>No images to display.</p>;
