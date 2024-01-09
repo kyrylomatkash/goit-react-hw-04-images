@@ -1,7 +1,7 @@
 // Імпорт бібліотек
 import React from 'react';
 import { Paper, CircularProgress } from '@mui/material';
-
+// Головна фунція компоненту
 const Loader = () => {
   return (
     <Paper
